@@ -1,0 +1,22 @@
+{
+	"name": "server",
+	"version": "1.0.0",
+	"main": "index.js",
+	"license": "MIT",
+	"scripts": {
+		"dev": "tsx watch src/index.ts",
+		"build": "tsc",
+		"start": "node dist/server/src/index.js"
+	},
+	"devDependencies": {
+		"@types/cors": "^2.8.17",
+		"nodemon": "^3.1.0",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.4.3"
+	},
+	"dependencies": {
+		"@types/express": "^4.17.21",
+		"cors": "^2.8.5",
+		"express": "^4.19.2"
+	}
+}
