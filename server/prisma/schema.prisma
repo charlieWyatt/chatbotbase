@@ -14,9 +14,12 @@ datasource db {
 }
 
 model User {
-  id       String     @id @default(nanoid())
-  messages Message[]  @relation("MessagesByUser")
-  Receiver Receiver[]
+  id           String     @id @default(nanoid())
+  username     String
+  email        String
+  passwordHash String
+  messages     Message[]  @relation("MessagesByUser")
+  Receiver     Receiver[]
 }
 
 model Receiver {

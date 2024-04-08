@@ -17,7 +17,7 @@ import { useUser } from "../hooks/useUser";
 const message = ref("");
 const emit = defineEmits(["refresh-messages"]);
 
-const { currUser } = useUser();
+const currUser = useUser();
 
 async function submitMessage() {
 	if (message.value.trim() !== "" && currUser.value) {
