@@ -1,13 +1,29 @@
 import { ref, onMounted } from "vue";
-import { getUser } from "../helpers/auth";
 import { User } from "../types";
+import { trpc } from "../trpc";
 
-const currUser = ref<User | null>(null);
 
 export function useUser() {
-	onMounted(async () => {
-		currUser.value = await getUser();
+	const currentUser = ref<User | null>(null);
+
+	onMounted(() => {
+		const token = localStorage.getItem('token');
+
+		if (token) {
+		const base64Url = token.split('.')[1];
+		const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+		const decodedToken = JSON.parse(window.atob(base64));
+		currentUser.value = decodedToken;
+		}
 	});
 
-	return { currUser };
+  return currentUser;
+}
+
+export function getUser(username: string) {
+	const user = ref<User | null>(null);
+	onMounted(async () => {
+		user.value = await trpc.user.getUser.query({ username });
+	});
+	return { user };
 }
