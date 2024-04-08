@@ -1,0 +1,13 @@
+{
+	"name": "chatbotbase",
+	"private": true,
+	"workspaces": [
+		"client",
+		"server"
+	],
+	"scripts": {
+		"start": "yarn workspaces run start",
+		"run:client": "yarn workspace client dev",
+		"run:server": "yarn workspace server dev"
+	}
+}
