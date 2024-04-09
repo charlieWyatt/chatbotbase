@@ -22,12 +22,32 @@ const token = computed(() => store.state.token); // Ensure you have the token in
 async function submitMessage() {
 	console.log(token.value);
 	if (message.value.trim() !== "" && token.value) {
-		await trpc.message.sendMessage.mutate({
-			token: token.value,
-			text: message.value,
-		});
-		message.value = ""; // Reset the input field after sending
-		emit("refresh-messages"); // Emit the event to notify the parent component to refresh messages
+		try {
+			// Sending the message
+			await trpc.message.sendMessage.mutate({
+				token: token.value,
+				text: message.value,
+			});
+			const userMessage = message.value;
+			message.value = ""; // Reset the input field after sending
+			emit("refresh-messages"); // Notify the parent component to refresh messages
+
+			// Calling the GPT model reply route to get a response
+			const gptResponse = await trpc.message.modelReply.mutate({
+				token: token.value, // Ensure to pass token if required by the backend
+				message: userMessage, // Pass the original message text
+			});
+
+			// Handle the GPT response
+			if (gptResponse && gptResponse.response) {
+				console.log("GPT Response:", gptResponse.response);
+				// Here you might want to show this response or use it further,
+				// For example, you can emit an event or update your UI accordingly
+				emit("refresh-messages", gptResponse.response);
+			}
+		} catch (error) {
+			console.error("Failed to send message or receive reply:", error);
+		}
 	}
 }
 </script>

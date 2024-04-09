@@ -66,4 +66,56 @@ export const messageRouter = router({
 			});
 			return message;
 		}),
+	modelReply: publicProcedure
+		.input(
+			z.object({
+				token: z.string(),
+				message: z.string().min(1, "Message must not be empty"),
+			})
+		)
+		.mutation(async ({ input }) => {
+			const { token, message } = input;
+			console.log(token);
+			console.log(message);
+			const url = "https://api.openai.com/v1/chat/completions";
+			try {
+				const response = await fetch(url, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+					},
+					body: JSON.stringify({
+						model: "gpt-3.5-turbo",
+						messages: [{ role: "user", content: message }],
+						temperature: 0.7,
+					}),
+				});
+
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+
+				const data = await response.json();
+				const gptResponse = data.choices[0].message.content;
+				console.log(gptResponse);
+
+				// Send the GPT response as a new message from the system
+				const systemMessage = await prisma.message.create({
+					data: {
+						text: gptResponse,
+						senderId: decodeToken(token).id, // Assuming system uses a special sender ID or similar setup
+						isSent: false,
+					},
+				});
+
+				return {
+					response: gptResponse,
+					systemMessageId: systemMessage.id,
+				};
+			} catch (error) {
+				console.error("Error calling GPT API or saving the message:", error);
+				throw new Error("Failed to process the message");
+			}
+		}),
 });
