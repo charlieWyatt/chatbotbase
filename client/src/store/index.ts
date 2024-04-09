@@ -1,50 +1,68 @@
-import { createStore, StoreOptions } from "vuex";
-import { User } from "../types";
+import { ActionContext, createStore } from "vuex";
+import { trpc } from "../trpc";
 
-// State type
 interface State {
-	currentUser: User | null;
+	token: string | null;
 }
 
-enum MutationType {
-	SET_USER = "setUser",
-	CLEAR_USER = "clearUser",
-}
-
-const mutations = {
-	[MutationType.SET_USER](state: State, user: User) {
-		state.currentUser = user;
-	},
-	[MutationType.CLEAR_USER](state: State) {
-		state.currentUser = null;
-	},
+type Mutations = {
+	setToken(state: State, payload: string): void;
+	clearToken(state: State): void;
 };
 
-type MyMutations = typeof mutations;
-
-type TypedCommit = <K extends keyof MyMutations>(
-	key: K,
-	payload?: Parameters<MyMutations[K]>[1]
-) => ReturnType<MyMutations[K]>;
-
-const actions = {
-	logIn({ commit }: { commit: TypedCommit }, user: User) {
-		commit(MutationType.SET_USER, user);
-	},
-	logOut({ commit }: { commit: TypedCommit }) {
-		commit(MutationType.CLEAR_USER);
-	},
+type ActionAugments = Omit<ActionContext<State, State>, "commit"> & {
+	commit<K extends keyof Mutations>(
+		key: K,
+		payload?: Parameters<Mutations[K]>[1] // payload type
+	): ReturnType<Mutations[K]>;
 };
 
-const store: StoreOptions<State> = {
+const store = createStore<State>({
 	state: {
-		currentUser: null,
+		token: null,
 	},
-	mutations,
-	actions,
+	mutations: {
+		setToken(state: State, token: string) {
+			state.token = token;
+			sessionStorage.setItem("token", token);
+		},
+		clearToken(state: State) {
+			state.token = null;
+			sessionStorage.removeItem("token");
+		},
+	},
+	actions: {
+		async signupUser(
+			{ commit }: ActionAugments,
+			{
+				username,
+				password,
+				email,
+			}: { username: string; password: string; email: string }
+		) {
+			try {
+				const result = await trpc.user.createUser.mutate({
+					username,
+					password,
+					email,
+				});
+				if (result.token) {
+					commit("setToken", result.token);
+				} else {
+					throw new Error("No token received from API.");
+				}
+			} catch (error) {
+				console.error("Error signing up and obtaining token:", error);
+				throw error;
+			}
+		},
+		logoutUser({ commit }: ActionAugments) {
+			commit("clearToken");
+		},
+	},
 	getters: {
-		currentUser: (state: State): User | null => state.currentUser,
+		token: (state: State) => state.token,
 	},
-};
+});
 
-export default createStore(store);
+export default store;

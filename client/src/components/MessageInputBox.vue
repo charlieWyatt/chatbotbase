@@ -10,20 +10,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { sendMessage } from "../helpers/messages";
-import { useUser } from "../hooks/useUser";
+import { ref, computed } from "vue";
+import { trpc } from "../trpc";
+import { useStore } from "vuex";
 
 const message = ref("");
+const store = useStore();
 const emit = defineEmits(["refresh-messages"]);
-
-const currUser = useUser();
+const token = computed(() => store.state.token); // Ensure you have the token in your state
 
 async function submitMessage() {
-	if (message.value.trim() !== "" && currUser.value) {
-		await sendMessage(message.value, currUser.value);
-		message.value = ""; // Reset the input field
-		emit("refresh-messages"); // Emit the event to notify the parent to refresh messages
+	console.log(token.value);
+	if (message.value.trim() !== "" && token.value) {
+		await trpc.message.sendMessage.mutate({
+			token: token.value,
+			text: message.value,
+		});
+		message.value = ""; // Reset the input field after sending
+		emit("refresh-messages"); // Emit the event to notify the parent component to refresh messages
 	}
 }
 </script>

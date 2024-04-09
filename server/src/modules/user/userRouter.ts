@@ -24,7 +24,6 @@ export const userRouter = router({
 		)
 		.mutation(async ({ input, ctx }) => {
 			const passwordHash = await bcrypt.hash(input.password, 10);
-
 			const user = await prisma.user.create({
 				data: {
 					username: input.username,

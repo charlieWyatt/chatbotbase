@@ -13,38 +13,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+generator db {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+  seed          = "ts-node prisma/seed.ts" // Adjust the path according to where your seed.ts file is
+}
+
 model User {
-  id           String     @id @default(nanoid())
-  username     String
-  email        String
-  passwordHash String
-  messages     Message[]  @relation("MessagesByUser")
-  Receiver     Receiver[]
+  id            String         @id @default(nanoid())
+  username      String         @unique
+  email         String         @unique
+  passwordHash  String
+  messages      Message[]      @relation("MessagesByUser")
+  conversations Conversation[]
 }
 
-model Receiver {
-  id        String  @id @default(nanoid())
-  user      User?   @relation(fields: [userId], references: [id])
-  userId    String?
-  group     Group?  @relation(fields: [groupId], references: [id])
-  groupId   String?
-  message   Message @relation(fields: [messageId], references: [id])
-  messageId String
-}
-
-model Group {
-  id       String     @id @default(nanoid())
-  messages Message[]  @relation("MessagesByGroup") // Relation is named here
-  Receiver Receiver[]
+model Conversation {
+  id       String    @id @default(nanoid())
+  user     User?     @relation(fields: [userId], references: [id])
+  userId   String?
+  title    String?
+  messages Message[] // Corrected: Removed the incorrect relation annotations here
 }
 
 model Message {
-  id        String     @id @default(nanoid())
-  createdAt DateTime   @default(now())
-  text      String
-  senderId  String
-  sender    User       @relation("MessagesByUser", fields: [senderId], references: [id])
-  groupId   String?
-  group     Group?     @relation("MessagesByGroup", fields: [groupId], references: [id]) // Opposite relation field correctly named and linked
-  Receiver  Receiver[]
+  id             String        @id @default(nanoid())
+  createdAt      DateTime      @default(now())
+  text           String
+  senderId       String
+  sender         User          @relation("MessagesByUser", fields: [senderId], references: [id])
+  isSent         Boolean
+  conversationId String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
 }

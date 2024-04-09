@@ -1,8 +1,8 @@
 <template>
-	<div v-if="currentUser">
+	<div v-if="token">
 		<MessagesWindow :messages="messages" />
 		<MessageInputBox @refresh-messages="refreshMessages" />
-		<LogOut/>
+		<LogOut />
 	</div>
 	<div v-else>
 		<LogIn />
@@ -14,18 +14,20 @@ import { onMounted, ref, computed } from "vue";
 import { useStore } from "vuex";
 import MessagesWindow from "./components/MessagesWindow.vue";
 import MessageInputBox from "./components/MessageInputBox.vue";
-import { getMessages } from "./helpers/messages";
 import { Message } from "./types";
 import LogIn from "./components/LogIn.vue";
-import LogOut from "./components/LogOut.vue"
+import LogOut from "./components/LogOut.vue";
+import { trpc } from "./trpc";
 
 const messages = ref<Message[]>([]);
 const store = useStore();
-const currentUser = computed(() => store.getters.currentUser);
+const token = computed(() => store.state.token);
 
 async function refreshMessages() {
-	if (currentUser.value) {
-		messages.value = await getMessages(currentUser.value);
+	if (token.value) {
+		messages.value = await trpc.message.getMessages.query({
+			token: token.value,
+		});
 	}
 }
 
