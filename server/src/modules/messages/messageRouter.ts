@@ -7,10 +7,8 @@ export const messageRouter = router({
 	getMessages: publicProcedure
 		.input(z.object({ token: z.string() }))
 		.query(async ({ input }) => {
-			console.log(input.token);
 			const userId = decodeToken(input.token).id; // Decode the token to get userId
-			console.log(userId);
-
+			
 			const messages = await prisma.message.findMany({
 				where: { senderId: userId },
 				select: {
@@ -52,8 +50,6 @@ export const messageRouter = router({
 		.mutation(async ({ input }) => {
 			const userId = decodeToken(input.token).id; // Decode the token to get userId
 
-			console.log(userId);
-
 			const sender = await prisma.user.findUnique({ where: { id: userId } });
 			if (!sender) throw new Error("Sender does not exist.");
 
@@ -75,8 +71,7 @@ export const messageRouter = router({
 		)
 		.mutation(async ({ input }) => {
 			const { token, message } = input;
-			console.log(token);
-			console.log(message);
+
 			const url = "https://api.openai.com/v1/chat/completions";
 			try {
 				const response = await fetch(url, {
@@ -98,7 +93,6 @@ export const messageRouter = router({
 
 				const data = await response.json();
 				const gptResponse = data.choices[0].message.content;
-				console.log(gptResponse);
 
 				// Send the GPT response as a new message from the system
 				const systemMessage = await prisma.message.create({

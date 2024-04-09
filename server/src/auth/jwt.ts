@@ -6,7 +6,6 @@ export const createToken = (user: {
 	email: string;
 	username: string;
 }) => {
-	console.log("JWTing");
 	return jwt.sign(
 		{
 			id: user.id,

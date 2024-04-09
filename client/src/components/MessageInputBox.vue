@@ -20,7 +20,6 @@ const emit = defineEmits(["refresh-messages"]);
 const token = computed(() => store.state.token); // Ensure you have the token in your state
 
 async function submitMessage() {
-	console.log(token.value);
 	if (message.value.trim() !== "" && token.value) {
 		try {
 			// Sending the message
@@ -29,20 +28,17 @@ async function submitMessage() {
 				text: message.value,
 			});
 			const userMessage = message.value;
-			message.value = ""; // Reset the input field after sending
-			emit("refresh-messages"); // Notify the parent component to refresh messages
+			message.value = "";
+			emit("refresh-messages");
 
 			// Calling the GPT model reply route to get a response
 			const gptResponse = await trpc.message.modelReply.mutate({
-				token: token.value, // Ensure to pass token if required by the backend
-				message: userMessage, // Pass the original message text
+				token: token.value,
+				message: userMessage,
 			});
 
 			// Handle the GPT response
 			if (gptResponse && gptResponse.response) {
-				console.log("GPT Response:", gptResponse.response);
-				// Here you might want to show this response or use it further,
-				// For example, you can emit an event or update your UI accordingly
 				emit("refresh-messages", gptResponse.response);
 			}
 		} catch (error) {
