@@ -101,6 +101,6 @@ app.get("*", (_, response) => {
 	response.sendFile(path.join(fullPath, "index.html"));
 });
 
-app.listen(4000, () => {
-	logger.info("🤘 Server started on http://localhost:4000");
+app.listen(3000, () => {
+	logger.info("🤘 Server started on http://localhost:3000");
 });

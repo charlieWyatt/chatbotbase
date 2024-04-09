@@ -1,27 +1,35 @@
 <template>
-	<MessagesWindow :messages="messages" />
-	<MessageInputBox @refresh-messages="refreshMessages" />
+	<div v-if="currentUser">
+		<MessagesWindow :messages="messages" />
+		<MessageInputBox @refresh-messages="refreshMessages" />
+		<LogOut/>
+	</div>
+	<div v-else>
+		<LogIn />
+	</div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
+import { useStore } from "vuex";
 import MessagesWindow from "./components/MessagesWindow.vue";
 import MessageInputBox from "./components/MessageInputBox.vue";
 import { getMessages } from "./helpers/messages";
-import { User, Message } from "./types";
-import { getUser } from "./helpers/auth";
+import { Message } from "./types";
+import LogIn from "./components/LogIn.vue";
+import LogOut from "./components/LogOut.vue"
 
 const messages = ref<Message[]>([]);
-const currUser = ref<User>(null);
+const store = useStore();
+const currentUser = computed(() => store.getters.currentUser);
 
 async function refreshMessages() {
-	if (currUser.value) {
-		messages.value = await getMessages(currUser.value);
+	if (currentUser.value) {
+		messages.value = await getMessages(currentUser.value);
 	}
 }
 
 onMounted(async () => {
-	currUser.value = await getUser();
 	await refreshMessages();
 });
 </script>
