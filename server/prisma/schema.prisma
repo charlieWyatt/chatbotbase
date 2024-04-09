@@ -25,15 +25,6 @@ model User {
   email         String         @unique
   passwordHash  String
   messages      Message[]      @relation("MessagesByUser")
-  conversations Conversation[]
-}
-
-model Conversation {
-  id       String    @id @default(nanoid())
-  user     User?     @relation(fields: [userId], references: [id])
-  userId   String?
-  title    String?
-  messages Message[] // Corrected: Removed the incorrect relation annotations here
 }
 
 model Message {
@@ -43,6 +34,4 @@ model Message {
   senderId       String
   sender         User          @relation("MessagesByUser", fields: [senderId], references: [id])
   isSent         Boolean
-  conversationId String?
-  conversation   Conversation? @relation(fields: [conversationId], references: [id])
 }
