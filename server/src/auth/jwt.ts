@@ -19,9 +19,9 @@ export const createToken = (user: {
 	);
 };
 
-export const decodeToken = async (token: string) => {
+export const decodeToken = (token: string) => {
 	// decode the token using a secret key-phrase
-	const user = (await jwt.verify(token, config.JWT_SECRET)) as {
+	const user = jwt.verify(token, config.JWT_SECRET) as {
 		id: string;
 		email: string;
 		username: string;

@@ -10,20 +10,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { sendMessage } from "../helpers/messages";
-import { useUser } from "../hooks/useUser";
+import { ref, computed } from "vue";
+import { trpc } from "../trpc";
+import { useStore } from "vuex";
 
 const message = ref("");
+const store = useStore();
 const emit = defineEmits(["refresh-messages"]);
-
-const currUser = useUser();
+const token = computed(() => store.state.token); // Ensure you have the token in your state
 
 async function submitMessage() {
-	if (message.value.trim() !== "" && currUser.value) {
-		await sendMessage(message.value, currUser.value);
-		message.value = ""; // Reset the input field
-		emit("refresh-messages"); // Emit the event to notify the parent to refresh messages
+	if (message.value.trim() !== "" && token.value) {
+		try {
+			// Sending the message
+			await trpc.message.sendMessage.mutate({
+				token: token.value,
+				text: message.value,
+			});
+			const userMessage = message.value;
+			message.value = "";
+			emit("refresh-messages");
+
+			// Calling the GPT model reply route to get a response
+			const gptResponse = await trpc.message.modelReply.mutate({
+				token: token.value,
+				message: userMessage,
+			});
+
+			// Handle the GPT response
+			if (gptResponse && gptResponse.response) {
+				emit("refresh-messages", gptResponse.response);
+			}
+		} catch (error) {
+			console.error("Failed to send message or receive reply:", error);
+		}
 	}
 }
 </script>
