@@ -1,10 +1,13 @@
 <template>
+	<div v-if="messages.length == 0">Type a message!</div>
 	<div class="messages-window">
-		<MessageBubble
-			v-for="message in messages"
-			:key="message.id"
-			:message="message"
-		/>
+		<div>
+			<MessageBubble
+				v-for="message in messages"
+				:key="message.id"
+				:message="message"
+			/>
+		</div>
 	</div>
 </template>
 

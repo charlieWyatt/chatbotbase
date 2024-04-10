@@ -1,8 +1,5 @@
 <template>
 	<div :class="['message-container', message.isSent ? 'sent' : 'received']">
-		<div v-if="!message.isSent" class="message-sender">
-			{{ message.sender }}
-		</div>
 		<div class="message-bubble">
 			<div class="message-content">{{ message.text }}</div>
 		</div>
@@ -48,12 +45,5 @@ defineProps<{ message: Message }>();
 
 .message-content {
 	color: black;
-}
-
-.message-sender {
-	color: grey; /* Grey color for the sender */
-	font-size: 0.75em;
-	margin-bottom: 5px; /* Space between the sender and the bubble */
-	align-self: flex-start; /* Ensures the sender's name aligns to the start */
 }
 </style>
