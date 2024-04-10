@@ -36,6 +36,10 @@ For mac -
 ### Set up Env
 Inside server there is a .env.sample file. Using that as a template, create a file in the same directory called ".env" and fill out those variables.
 
+### Generating Tables
+
+Navigate to the "server" directory, then run `yarn prisma migrate dev`
+
 ## Running
 In one terminal run - 
 
