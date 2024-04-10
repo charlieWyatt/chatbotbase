@@ -16,9 +16,10 @@ Backend -
 - prisma
 - postgreSQL
 
-## To run locally - 
+## Set up
 
 ### Install packages
+Run `yarn install` from the root of your repository
 
 ### Set up local db
 If you don't have postgres installed. Install it. - 
@@ -31,3 +32,16 @@ For mac -
 `brew services start postgresql`
 
 `createdb chatbotbase`
+
+### Set up Env
+Inside server there is a .env.sample file. Using that as a template, create a file in the same directory called ".env" and fill out those variables.
+
+## Running
+In one terminal run - 
+
+`yarn run:client`
+
+In another terminal run -
+
+`yarn run:server`
+
