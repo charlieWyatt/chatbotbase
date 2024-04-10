@@ -1,10 +1,13 @@
 <template>
 	<div class="main-input-box">
-		<input
+		<textarea
 			v-model="message"
 			placeholder="Type your message here"
-			@keyup.enter="submitMessage"
-		/>
+			@keydown.enter="handleEnter"
+			rows="1"
+			ref="textareaRef"
+			@input="adjustTextareaHeight"
+		></textarea>
 		<button @click="submitMessage">Submit</button>
 	</div>
 </template>
@@ -46,6 +49,25 @@ async function submitMessage() {
 		}
 	}
 }
+
+function handleEnter(event: KeyboardEvent) {
+	// Prevent the default behavior when Shift is not pressed
+	if (!event.shiftKey) {
+		event.preventDefault();
+		submitMessage();
+	}
+	// When Shift is pressed, allow the default behavior (new line)
+}
+
+const textareaRef = ref<HTMLTextAreaElement | null>(null);
+
+function adjustTextareaHeight() {
+	const textarea = textareaRef.value;
+	if (!textarea) return;
+
+	textarea.style.height = "auto"; // Reset height to auto to correctly calculate the scrollHeight
+	textarea.style.height = `${textarea.scrollHeight}px`; // Set height to the scrollHeight to fit the content
+}
 </script>
 
 <style scoped>
@@ -55,10 +77,13 @@ async function submitMessage() {
 	padding: 10px;
 }
 
-.main-input-box input {
-	flex-grow: 1; /* Make the input expand to fill available space */
+.main-input-box textarea {
+	flex-grow: 1; /* Make the textarea expand to fill available space */
 	padding: 10px;
-	margin-right: 10px; /* Add some space between the input and the button */
+	margin-right: 10px; /* Add some space between the textarea and the button */
+	resize: none; /* Disable resizing */
+	box-sizing: border-box; /* Include padding and border in textarea's total height */
+	overflow-y: hidden; /* Hide vertical scrollbar */
 }
 
 .main-input-box button {
